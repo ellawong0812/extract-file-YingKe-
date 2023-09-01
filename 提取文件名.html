@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<!--  website's name   -->
+	<title>文件名提取器</title>
+    <style>
+        #title1 {
+            background-color: #0077b6;
+			color: white;
+			border: none;
+			padding: 5px;
+			margin-left: 10px;
+			cursor: pointer;
+        }
+        #title3{
+            background-color: #0077b6;
+			color: white;
+			border:0ch;
+			padding: 5px;
+			margin-left: 10px;
+			cursor:auto;
+        }
+		#selectfilebutton{
+			border:5px rgb(42, 120, 165) solid;
+			background-color:rgb(104, 206, 239);
+			transition: ease-in-out 0.3s;
+			border-radius: 10px;
+			
+			margin-left: 46%;
+			height: 20px;
+			width:110px;
+			 
+		}
+		#selectfilebutton:hover {
+  			background-color: #3e8e41;
+  			box-shadow: 0px 3px 0px #2E8B57;
+  			transform: translateY(2px);
+		}
+		#downloadcsv{
+			border:5px rgb(42, 120, 165) solid;
+			background-color:rgb(104, 206, 239);
+			transition: ease-in-out 0.3s;
+			border-radius: 10px;
+			margin-left: 0%;
+		}
+		#downloadcsv:hover {
+  			background-color: #3e8e41;
+ 		 	box-shadow: 0px 3px 0px #2E8B57;
+ 		 	transform: translateY(2px);
+		}
+		#contentbackground{
+			background-color:rgb(225, 227, 227);
+			
+		}
+		
+    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+
+
+<body style="text-align: center;">
+    <!--  website's header/title   -->
+	<!--  web page content   -->
+
+	<img src="WechatIMG184.jpg">
+	<h1 id="title1">提取文件名和日期</h1>
+
+
+    <div id="contentbackground" >
+   	<h1 style="color:rgb(97, 97, 234);">功能：</h1>
+    <p style="font-size:100%;">方便提取文件夹内所有文件的名称和日期，未联网也可使用。</p>
+    
+    
+    <h1 style="color:rgb(97, 97, 234);">使用方法:</h1>
+    <p style="font-size:150%;">
+    1. 按 “选择文件夹&#128193;” <br>
+    2. 选择你想上载的文件夹 <br>
+    3. 就会列出文件夹内的所有文件名称和日期<br>
+    4. 你亦可按 “下载CSV”，试算表内会有齐文件的名称和日期<br>
+    
+    </p>
+    
+    <h1 style="color:rgb(97, 97, 234);">安全问题:</h1>
+    <p>
+    <b>没有安全问题，资料不会外泄，请安心使用。</b><br>
+	　因为这个网站没有使用任何第三方程式，而且亦没有后端伺服器，<br>上传的档案也没有地方储存，所以资料不会外泄。
+    
+    
+    </p>
+	<p></p>
+    </div>
+	
+	<h2 style="background-color:rgb(197, 227, 255);">选择文件夹:</h2>
+
+	<div id="selectfilebutton">
+
+	<label for="fileInput" class="btn">选择文件夹&#128193;</label>
+	<input type="file" id="fileInput" name="upload" onchange="extractFileNamesAndDates()" style="display: none;" webkitdirectory directory multiple>
+	</div>
+
+	
+	<p></p>
+	<button type="button" onclick="tableToCSV()" id="downloadcsv">
+		下载CSV
+	</button>
+	<p></p>
+
+	<table id="fileTable">
+		<thead>
+		<tr id="title3">
+			<th>文件名</th>
+			<th>最后修改日期</th>
+			
+		</tr>
+	</thead>
+	<tbody></tbody>
+</table>
+<script>
+	function extractFileNamesAndDates() {
+		// get the file input element and its selected files
+		var fileInput = document.getElementById("fileInput");
+		var files = fileInput.files;
+
+		// create an empty table row for each file
+		var table = document.getElementById("fileTable");
+		var tbody = table.getElementsByTagName("tbody")[0];
+		tbody.innerHTML = "";
+		//for each selected file
+		for (var i = 0; i < files.length; i++) {
+			//retrieve file name and modified date
+			//put into a row and then append to a table
+			var row = document.createElement("tr");
+			var tdFileNameCell = document.createElement("td");
+			tdFileNameCell.textContent = files[i].name;
+			row.appendChild(tdFileNameCell);
+
+			var tdModifiedDateCell = document.createElement("td");
+			tdModifiedDateCell.textContent = files[i].lastModifiedDate;
+			row.appendChild(tdModifiedDateCell);
+			tbody.appendChild(row);
+
+			console.log('files:',files[i])
+		}
+
+		
+	}
+
+	function tableToCSV() {
+ 
+ 		// Variable to store the final csv data
+ 		var csv_data = [];
+
+ 		// Get each row data
+ 		var rows = document.getElementsByTagName('tr');
+ 		for (var i = 0; i < rows.length; i++) {
+
+		 // Get each column data
+		var cols = rows[i].querySelectorAll('td,th');
+
+		 // Stores each csv row data
+		 var csvrow = [];
+		 for (var j = 0; j < cols.length; j++) {
+
+		 // Get the text data of each cell
+		 // of a row and push it to csvrow
+		 csvrow.push(cols[j].innerHTML);
+	 }
+
+	 	// Combine each column value with comma
+	 	csv_data.push(csvrow.join(","));
+ }
+
+ 		// Combine each row data with new line character
+ 		csv_data = csv_data.join('\n');
+
+ 		// Call this function to download csv file 
+ 		downloadCSVFile(csv_data);
+
+}
+
+		function downloadCSVFile(csv_data) {
+
+ 		// Create CSV file object and feed
+ 		// our csv_data into it
+ 		CSVFile = new Blob(["\ufeff",csv_data], {
+		 type: "text/csv"
+ });
+
+ 		// Create to temporary link to initiate
+ 		// download process
+ 		var temp_link = document.createElement('a');
+
+
+
+ 		// Download csv file
+ 		temp_link.download = 'GfG.csv';
+ 		var url = window.URL.createObjectURL(CSVFile);
+ 		temp_link.href = url;
+
+ 		// This link should not be displayed
+ 		temp_link.style.display = "none";
+ 		document.body.appendChild(temp_link);
+
+ 		// Automatically click the link to
+ 		// trigger download
+ 		temp_link.click();
+ 		document.body.removeChild(temp_link);
+}
+
+
+
+</script>
+
+
+ </body>
+
+</html>

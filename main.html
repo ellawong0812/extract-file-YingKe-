@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>文件名和修改日期提取器</title>
+    <style>
+        #title1 {
+            background-color: #0077b6;
+			color: white;
+			border: none;
+			padding: 5px;
+			margin-left: 10px;
+			cursor: pointer;
+        }
+        #title3{
+            background-color: #0077b6;
+			color: white;
+			border:0ch;
+			padding: 5px;
+			margin-left: 10px;
+			cursor:auto;
+        }
+    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    
+	<h1 id="title1">提取文件名</h1>
+   
+	<label for="fileInput">选择文件夹：</label>
+	<input type="file" id="fileInput" webkitdirectory directory multiple>
+	<button onclick="extractFileNamesAndDates()">提取文件名</button>
+ 
+	<table id="fileTable">
+		<thead>
+			<tr id="title3">
+				<th>文件名</th>
+				
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+	<script>
+		function extractFileNamesAndDates() {
+			// get the file input element and its selected files
+			var fileInput = document.getElementById("fileInput");
+			var files = fileInput.files;
+
+			// create an empty table row for each file
+			var table = document.getElementById("fileTable");
+			var tbody = table.getElementsByTagName("tbody")[0];
+			tbody.innerHTML = "";
+			for (var i = 0; i < files.length; i++) {
+				var tr = document.createElement("tr");
+				var tdFileName = document.createElement("td");
+				tdFileName.textContent = files[i].name;
+				tr.appendChild(tdFileName);
+				var tdModifiedDate = document.createElement("td");
+				tr.appendChild(tdModifiedDate);
+				tbody.appendChild(tr);
+			}
+
+			// iterate over the selected files and extract their names and last modified dates
+			for (var i = 0; i < files.length; i++) {
+				var file = files[i];
+				var fileName = file.name;
+				var fileExtension = fileName.split(".").pop();
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					var data = e.target.result;
+					if (fileExtension === "pdf") {
+						// extract last modified date from PDF document
+						var pdf = new window.PDFJS.PDFDocumentProxy(data);
+						var lastModifiedDate = pdf.getMetadata().then(function (metadata) {
+							var date = metadata["metadata"].get("ModDate");
+							return date ? new Date(date) : "";
+						});
+					} else if (fileExtension === "docx") {
+						// extract last modified date from Word document
+						var doc = new window.docxParser().parse(data);
+						var lastModifiedDate = doc.properties.modified || "";
+					}
+					// display the last modified date in the table
+					var tr = tbody.getElementsByTagName("tr")[i];
+					tr.getElementsByTagName("td")[1].textContent = lastModifiedDate;
+				}
+				reader.readAsArrayBuffer(file);
+			}
+        }
+
+		
+
+ 
+	</script>
+	<script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+	<script src="https://unpkg.com/docx-parser/dist/docx-parser.min.js"></script>
+    
+</body>
+</html>
